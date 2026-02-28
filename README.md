@@ -1,6 +1,6 @@
-SaaS Analytics Project
+# **SaaS Analytics Project**
 
-Objetivo
+## Objetivo
 Construir um pipeline de dados completo para uma empresa SaaS fictícia de assinaturas, permitindo:
 - Cálculo de MRR
 - Cálculo de Churn
@@ -9,14 +9,17 @@ Construir um pipeline de dados completo para uma empresa SaaS fictícia de assin
 - Separação entre camadas RAW e analytics
 - Simulação de ambiente real de engenharia de dados
 
-Arquitetura do Projeto
+## Arquitetura do Projeto
 
-Fluxo de dados:
+### Fluxo de dados:
 
+```
 Gerador Python -> CSV (Data Lake Simulado) -> PostgreSQL (RAW) -> Camada Analytics (Star Schema) -> Métricas (MRR, Churn, LTV)
+```
 
-Estrutura do Projeto
+## Estrutura do Projeto
 
+```
 saas-analytics-project/
 │
 ├── data_users.csv
@@ -37,8 +40,9 @@ saas-analytics-project/
 │
 ├── requirements.txt
 └── README.md
+```
 
-Geração de Dados (Data Simulation)
+## Geração de Dados (Data Simulation)
 
 Arquivo: generate_data.py
 
@@ -52,47 +56,48 @@ O que foi feito
 - Geração de pagamentos mensais recorrentes
 - Exportação para CSV
 
-Tabelas Geradas
+## Tabelas Geradas
 
-users:
-coluna              descrição
-user_id             UUID do usuário
-created_at          data de criação
-country             país
+**users:**
+|coluna|descrição|
+|--|--|
+|user_id|UUID do usuário|
+|created_at|data de criação|
+|country|país|
 
-subscriptions:
-coluna              descrição
-subscription_id     UUID
-user_id             FK
-plan                plano
-start_date          início
-cancel_date         cancelamento
-monthly_value       valor
-status              ativo/cancelado
+**subscriptions:**
+|coluna|descrição|
+|--|--|
+|subscription_id|UUID|
+|user_id|FK|
+|plan|plano|
+|start_date|início|
+|cancel_date|cancelamento|
+|monthly_value|valor|
+|status|ativo/cancelado|
 
-payments:
-coluna              descrição
-payment_id          UUID
-subscription_id     FK
-payment_date        data do pagamento
-amount              valor
-payment_status      status
+**payments:**
+|coluna|descrição|
+|--|--|
+|payment_id|UUID|
+|subscription_id|FK|
+|payment_date|data do pagamento|
+|amount|valor|
+|payment_status|status|
 
-Banco de dados
+## Banco de dados
 
 Banco: saas_analytics
 
 Schemas:
-<!--
-CREATE SCHEMA raw;
-CREATE SCHEMA analytics;
--->
+`CREATE SCHEMA raw;`
+`CREATE SCHEMA analytics;`
 
 Separação professional:
 - raw -> dados brutos
 - analytics -> dados transformados
 
-Carga para PostgreSQL
+## Carga para PostgreSQL
 
 Arquivo: load_to_postgres.py
 
@@ -101,16 +106,16 @@ Responsável por:
 - Inserir nas tabelas RAW
 - Utilizar SQLAlchemy + psycopg2
 
-Instalação das dependências
+### *Instalação das dependências*
 
-Execute o comando: pip install -r requirements.txt
+Execute o comando: `pip install -r requirements.txt`
 
-Modelagem Analítica (Star Schema)
+## Modelagem Analítica (Star Schema)
 
 Granularidade da fato:
 1 linha = 1 pagamento
 
-Fato Principal
+### Fato Principal
 
 analytics.fact_payments
 contém:
@@ -127,7 +132,7 @@ Criada via JOIN entre:
 - raw.subscriptions
 - raw.users
 
-Dimensão de Data
+### Dimensão de Data
 
 analytics.dim_date
 Campos:
@@ -136,20 +141,20 @@ Campos:
 - month
 - year_month
 
-Métricas Implementadas
+## Métricas Implementadas
 
-MRR (Monthly Recurring Revenue)
+### MRR (Monthly Recurring Revenue)
 
-<!--
+```
 SELECT
     DATE_TRUNC('month', payment_date) AS month,
     SUM(amount) AS mrr
 FROM analytics.fact_payments
 GROUP BY 1
 ORDER BY 1;
--->
+```
 
-Churn Rate Mensal
+### Churn Rate Mensal
 
 Definição:
 Cancelamentos no mês / Clientes ativos no início do mês
@@ -164,19 +169,19 @@ Lógica:
 2. Calcular cancelamentos no mês
 3. Dividir
 
-LTV (Lifetime Value)
+## LTV (Lifetime Value)
 
-LTV Histórico por Usuário:
-<!-- 
+### LTV Histórico por Usuário:
+```
 SELECT
     user_id,
     SUM(amount) AS lifetime_revenue
 FROM analytics.fact_payments
 GROUP BY user_id;
--->
+```
 
-LTV Médio:
-<!-- 
+### LTV Médio:
+```
 SELECT
     ROUND(AVG(lifetime_revenue), 2) AS avg_ltv
 FROM (
@@ -186,12 +191,12 @@ FROM (
     FROM analytics.fact_payments
     GROUP BY user_id
 ) t;
--->
+```
 
-LTV por Plano
+### LTV por Plano
 Permite análise estratégica de monetização.
 
-Conceitos Demonstrados
+## Conceitos Demonstrados
 
 Este projeto demonstra:
 - Construção de pipeline do zero
@@ -202,7 +207,7 @@ Este projeto demonstra:
 - Pensamento analítico de negócio
 - Estrutura profissional de projeto
 
-Proximos Passos (Evolução do Projeto)
+## Proximos Passos (Evolução do Projeto)
 - Implementar carga incremental
 - Orquestra com Airflow
 - Criar dashboard (Power BI ou Metabase)
